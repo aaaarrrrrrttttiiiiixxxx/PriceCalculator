@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:14.5
+    container_name: test_db
+    environment:
+      POSTGRES_DB: "test_db"
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "asdasdasd"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - 5432:5432
+
+  server:
+    build: .
+#    command: uvicorn main:app --host 0.0.0.0
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn main:app --host 0.0.0.0
+      "
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - postgres
+#      postgres:
+#        condition: service_started
